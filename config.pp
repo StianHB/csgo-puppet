@@ -16,12 +16,12 @@ class steamCMD::config (
 		quit"
 
 	file { "$config_path":
-		content = "$str",
-		owner = "steam",
-		ensure = present,
+		content => "$str",
+		owner => "steam",
+		ensure => present,
 	}
-	exec { 'run steamcmd'
-		command = "${install_directory}/steamcmd +runscript ${config_path}",
-		user = "steam",
+	exec { 'launch steamcmd':
+		command => "${install_directory}/steamcmd +runscript ${config_path}",
+		user => "steam",
 	}
 }

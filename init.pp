@@ -1,6 +1,6 @@
 class steamCMD (
 	$install_directory 	= $::steamCMD::params::install_directory,
-	$URL 			= $::steamCMD::params::URL,
+	$url 			= $::steamCMD::params::url,
 	$login 			= $::steamCMD::params::login,
 	$password		= $::steamCMD::params::password,
 	$app_id			= $::steamCMD::params::app_id,
