@@ -7,6 +7,7 @@ class steamCMD (
 	$config_path		= $::steamCMD::params::config_path,
 	) inherits steamCMD::params {
 
-	validate_absolute_path($install_directory)
+	#validate_absolute_path($install_directory)
+	#validate_absolute_path($config_path)
 
 }
