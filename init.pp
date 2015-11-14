@@ -10,4 +10,7 @@ class steamCMD (
 	#validate_absolute_path($install_directory)
 	#validate_absolute_path($config_path)
 
+	include steamCMD::config
+	include steamCMD::install
+
 }

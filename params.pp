@@ -1,5 +1,5 @@
 class steamCMD::params {
-	$install_directory 	= '~/steamcmd'
+	$install_directory 	= '/home/vinjar/steamcmd'
 	$url 			= 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz'
 	$login			= 'anonymous'
 	$password		= undef

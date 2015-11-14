@@ -7,21 +7,17 @@ class steamCMD::config (
 	) {
 	$str = "login $login"
 	if $password {
-		$str = "@NoPromptForPassword 1
+		$pt2 = "@NoPromptForPassword 1
 			${str} ${password}"
 	}
-	$str = "${str}
+	$fin = "${pt2}
 		force_install_dir ${install_directory}
 		app_update ${app_id} validate
 		quit"
 
 	file { "$config_path":
 		ensure => present,
-		content => "$str",
+		content => "$fin",
 		owner => "steam",
-	}
-	exec { 'launch steamcmd':
-		command => "${install_directory}/steamcmd +runscript ${config_path}",
-		user => "steam",
 	}
 }
