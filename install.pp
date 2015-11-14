@@ -2,13 +2,15 @@ class steamCMD::install (
 	$url 			= $::steamCMD::url,
 	$install_directory 	= $::steamCMD::install_directory,
 	) {
+	include 'archive'
 	package { 'lib32-gcc-libs': #for Arch linux
 		ensure => latest,
 	}
-	archive { 'steamCMD':
+	archive { "$install_directory":
 		ensure => present,
-		url => $url,
-		target => $install_directory,
+		source => $url,
+		extract => true,
+		extract_path => $install_directory,
 	}
 	user { 'steam':
 		ensure => 'present',
@@ -17,7 +19,7 @@ class steamCMD::install (
 		uid => '1101',
 	}
 	exec { "${install_directory}/steamcmd +runscript install_csgo":
-		require => Archive['steamCMD'],
+		require => Archive["$install_directory"],
 		user => 'steam',
 		cwd => $install_directory,
 	}
