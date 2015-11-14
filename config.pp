@@ -8,12 +8,14 @@ class steamCMD::config (
 	$str = "login $login"
 	if $password {
 		$pt2 = "@NoPromptForPassword 1
-			${str} ${password}"
+${str} ${password}"
 	}
+	else { $pt2 = $str }
 	$fin = "${pt2}
-		force_install_dir ${install_directory}
-		app_update ${app_id} validate
-		quit"
+force_install_dir ${install_directory}
+app_update ${app_id} validate
+quit
+"
 
 	file { "$config_path":
 		ensure => present,
