@@ -1,15 +1,12 @@
-class steamCMD (
-	$install_directory 	= $::steamCMD::params::install_directory,
-	$url 			= $::steamCMD::params::url,
-	$login 			= $::steamCMD::params::login,
-	$password		= $::steamCMD::params::password,
-	$app_id			= $::steamCMD::params::app_id,
-	$config_path		= $::steamCMD::params::config_path,
-	) inherits steamCMD::params {
+class steamcmd (
+	$install_directory 	= $::steamcmd::params::install_directory,
+	$url 			= $::steamcmd::params::url,
+	$login 			= $::steamcmd::params::login,
+	$password		= $::steamcmd::params::password,
+	$app_id			= $::steamcmd::params::app_id,
+	$config_path		= $::steamcmd::params::config_path,
+	) inherits steamcmd::params {
 
-	#validate_absolute_path($install_directory)
-	#validate_absolute_path($config_path)
-
-	contain steamCMD::config
-	contain steamCMD::install
+	contain steamcmd::config
+	contain steamcmd::install
 }

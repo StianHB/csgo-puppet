@@ -1,25 +1,29 @@
-class steamCMD::install (
-	$url 			= $::steamCMD::url,
-	$install_directory 	= $::steamCMD::install_directory,
+class steamcmd::install (
+	$url 			= $::steamcmd::url,
+	$install_directory 	= $::steamcmd::install_directory,
 	) {
-	include 'archive'
-	package { 'lib32-gcc-libs': #for Arch linux
+	$steam_dependency = $osfamily ? {
+		'Debian' => 'lib32gcc1',
+		'Ubuntu' => 'lib32gcc1',
+		'Arch' => 'lib32-gcc-libs',
+		'RedHat' => 'libstdc++.i686',
+		'CentOS' => 'libstdc++.i686',
+		default => 'lib32gcc1',
+	}
+	package { $steam_dependency:
 		ensure => latest,
 	}
-	archive { "$install_directory":
+	archive { 'stcmd':
+		user => 'steam',
+		checksum => false,
+		target => $install_directory,
 		ensure => present,
-		source => $url,
-		extract => true,
-		extract_path => $install_directory,
+		url => $url,
+		src_target => '/tmp'
 	}
-	user { 'steam':
-		ensure => 'present',
-		comment => 'User account for the steamCMD application. Created by puppet.',
-		home => $install_directory,
-		uid => '1101',
-	}
-	exec { "${install_directory}/steamcmd +runscript install_csgo":
-		require => Archive["$install_directory"],
+	exec { "${install_directory}/steamcmd.sh +runscript install_csgo":
+		timeout => 0,
+		require => Archive['stcmd'],
 		user => 'steam',
 		cwd => $install_directory,
 	}

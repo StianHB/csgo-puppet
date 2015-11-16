@@ -1,10 +1,22 @@
-class steamCMD::config (
-	$install_directory 	= $steamCMD::install_directory,
-	$login 			= $steamCMD::login,
-	$password 		= $steamCMD::password,
-	$app_id 		= $steamCMD::app_id,
-	$config_path 		= $steamCMD::config_path,
+class steamcmd::config (
+	$install_directory 	= $steamcmd::install_directory,
+	$login 			= $steamcmd::login,
+	$password 		= $steamcmd::password,
+	$app_id 		= $steamcmd::app_id,
+	$config_path 		= $steamcmd::config_path,
 	) {
+	user { 'steam':
+		ensure => present,
+		comment => 'User account for the steamcmd application. Created by puppet.',
+		managehome => true,
+	}
+	file { $install_directory:
+		ensure => 'directory',
+		owner => 'steam',
+		group => 'steam',
+		mode => '0644',
+	}
+
 	$str = "login $login"
 	if $password {
 		$pt2 = "@NoPromptForPassword 1
@@ -20,6 +32,8 @@ quit
 	file { "$config_path":
 		ensure => present,
 		content => "$fin",
-		owner => "steam",
+		owner => 'steam',
+		group => 'steam',
+		mode => '0644',
 	}
 }
