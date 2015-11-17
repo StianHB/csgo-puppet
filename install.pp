@@ -5,7 +5,7 @@ class steamcmd::install (
 	$steam_dependency = $osfamily ? {
 		'Debian' => 'lib32gcc1',
 		'Ubuntu' => 'lib32gcc1',
-		'Arch' => 'lib32-gcc-libs',
+		'Archlinux' => 'lib32-gcc-libs',
 		'RedHat' => 'libstdc++.i686',
 		'CentOS' => 'libstdc++.i686',
 		default => 'lib32gcc1',
