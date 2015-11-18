@@ -1,0 +1,15 @@
+{
+  "name": "group12-steamCMD",
+  "version": "0.1.0",
+  "author": "group12",
+  "summary": "Installs steamCMD and a game server",
+  "license": "Apache 2.0",
+  "source": "",
+  "project_page": null,
+  "issues_url": null,
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"},
+    {"name":"nanliu-archive","version_requirement":">= 1.0.0"}
+  ]
+}
+

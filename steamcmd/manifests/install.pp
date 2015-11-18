@@ -5,7 +5,7 @@ class steamcmd::install (
 	$steam_dependency = $osfamily ? {
 		'Debian' => 'lib32gcc1',
 		'Ubuntu' => 'lib32gcc1',
-		'Archlinux' => 'lib32-gcc-libs',
+		'Arch' => 'lib32-gcc-libs',
 		'RedHat' => 'libstdc++.i686',
 		'CentOS' => 'libstdc++.i686',
 		default => 'lib32gcc1',
@@ -21,7 +21,7 @@ class steamcmd::install (
 		url => $url,
 		src_target => '/tmp'
 	}
-	exec { "${install_directory}/steamcmd.sh +runscript conf":
+	exec { "${install_directory}/steamcmd.sh +runscript conf &":
 		timeout => 0,
 		require => Archive['stcmd'],
 		user => 'steam',
