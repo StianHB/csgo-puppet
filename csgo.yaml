@@ -28,6 +28,7 @@ parameters:
   private_subnet:
     type: string
     description: subnet-id for servers
+    default: 192.168.180.0/24
   sec_group_lin:
     type: comma_delimited_list
     description: Security groups
