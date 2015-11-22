@@ -1,0 +1,192 @@
+heat_template_version: 2013-05-23
+
+description: >
+        Creating a manager node for puppet with x amount of cs:go servers, each instance should have a bit off disk space as the
+        steam server requires quite a bit of space.
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: adminKey
+  name_lin1:
+    type: string
+    description: Name of linux server
+    default: manager
+  image_lin1:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_lin1:
+    type: string
+    description: Flavor to use for servers
+    default: m1.medium
+  name_lin3:
+    type: string
+    description: Name of linux server
+    default: manager
+  image_lin3:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_lin3:
+    type: string
+    description: Flavor to use for servers
+    default: m1.medium
+  name_lin2:
+    type: string
+    description: Name of linux server
+    default: csgo-host
+  image_lin2:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_lin2:
+    type: string
+    description: Flavor to use for servers
+    default: m1.medium
+  public_net:
+    type: string
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+  private_net_name:
+    type: string
+    description: Name of private network to be created
+    default: csgo-net
+  private_net_cidr:
+    type: string
+    description: Private network address (CIDR notation)
+    default: 192.168.180.0/24
+  private_net_gateway:
+    type: string
+    description: Private network gateway address
+    default: 192.168.180.1
+  private_net_pool_start:
+    type: string
+    description: Start of private network IP address allocation pool
+    default: 192.168.180.100
+  private_net_pool_end:
+    type: string
+    description: End of private network IP address allocation pool
+    default: 192.168.180.199
+  sec_group_lin:
+    type: comma_delimited_list
+    description: Security groups
+    default:
+      - default
+      - linux
+      - csgo-rules
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: private_net_name }
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: { get_param: private_net_cidr }
+      gateway_ip: { get_param: private_net_gateway }
+      allocation_pools:
+        - start: { get_param: private_net_pool_start }
+          end: { get_param: private_net_pool_end }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+  server1:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name_lin1 }
+      image: { get_param: image_lin1 }
+      flavor: { get_param: flavor_lin1 }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server1_port }
+
+  server1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  server1_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: server1_port }
+
+  server2:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name_lin2 }
+      image: { get_param: image_lin2 }
+      flavor: { get_param: flavor_lin2 }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server2_port }
+
+  server2_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  server2_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: server2_port }
+
+  server3:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name_lin2 }
+      image: { get_param: image_lin2 }
+      flavor: { get_param: flavor_lin2 }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server3_port }
+
+  server3_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  server3_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: server3_port }
+
+outputs:
+  server1_private_ip:
+    description: IP address of server1 in private network
+    value: { get_attr: [ server1, first_address ] }
+  server1_public_ip:
+    description: Floating IP address of server1 in public network
+    value: { get_attr: [ server1_floating_ip, floating_ip_address ] }
+  server3_private_ip:
+    description: IP address of server3 in private network
+    value: { get_attr: [ server3, first_address ] }
+  server3_public_ip:
+    description: Floating IP address of server3 in public network
+    value: { get_attr: [ server3_floating_ip, floating_ip_address ] }

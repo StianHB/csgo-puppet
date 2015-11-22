@@ -1,0 +1,57 @@
+heat_template_version: 2014-10-16
+
+description: >
+        Creating a manager node for puppet with x amount of cs:go servers, each instance should have a bit off disk space as the
+        steam server requires quite a bit of space.
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: adminKey
+  name_csgo:
+    type: string
+    description: Name of linux server
+    default: manager
+  image_csgo:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_csgo:
+    type: string
+    description: Flavor to use for servers
+    default: m1.medium
+  private_net_name:
+    type: string
+    description: Name of private network to be created
+    default: csgo-net
+  private_subnet:
+    type: string
+    description: subnet-id for servers
+  sec_group_lin:
+    type: comma_delimited_list
+    description: Security groups
+    default:
+      - default
+      - linux
+      - csgo-rules
+
+resources:
+  port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_name }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet }      
+
+  server_csgo:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name_csgo }
+      image: { get_param: image_csgo }
+      flavor: { get_param: flavor_csgo }
+      key_name: { get_param: key_name }
+      networks: 
+        - { get_resource: port }
+       
