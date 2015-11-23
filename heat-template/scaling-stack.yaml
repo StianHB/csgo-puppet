@@ -1,0 +1,145 @@
+heat_template_version: 2013-05-23
+
+description: >
+        Creating a manager node for puppet with x amount of cs:go servers, each instance should have a bit off disk space as the
+        steam server requires quite a bit of space.
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: adminKey
+  name_manager:
+    type: string
+    description: Name of linux server
+    default: manager
+  image_manager:
+    type: string
+    description: Name of image to use for servers
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_manager:
+    type: string
+    description: Flavor to use for servers
+    default: m1.medium
+  name_csgo:
+    type: string
+    description: name to be used for csgo nodes
+    default: csgo-host
+  image_csgo:
+    type: string
+    description: Image for the csgo server
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  flavor_csgo:
+    type: string
+    description: Flavor for the csgo servers
+    default: m1.medium
+  public_net:
+    type: string
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+  private_net_name:
+    type: string
+    description: Name of private network to be created
+    default: csgo-net
+  private_net_cidr:
+    type: string
+    description: Private network address (CIDR notation)
+    default: 192.168.180.0/24
+  private_net_gateway:
+    type: string
+    description: Private network gateway address
+    default: 192.168.180.1
+  private_net_pool_start:
+    type: string
+    description: Start of private network IP address allocation pool
+    default: 192.168.180.100
+  private_net_pool_end:
+    type: string
+    description: End of private network IP address allocation pool
+    default: 192.168.180.199
+  sec_group_lin:
+    type: comma_delimited_list
+    description: Security groups
+    default:
+      - default
+      - linux
+      - csgo-rules
+  nr_of_hosts:
+    type: number
+    description: Nr. of CS-GO host servers to spawn
+    default: 2
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: private_net_name }
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: { get_param: private_net_cidr }
+      gateway_ip: { get_param: private_net_gateway }
+      allocation_pools:
+        - start: { get_param: private_net_pool_start }
+          end: { get_param: private_net_pool_end }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+  manager:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name_manager }
+      image: { get_param: image_manager }
+      flavor: { get_param: flavor_manager }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: manager_port }
+
+  manager_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  manager_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: manager_port }
+
+  port_csgo:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      security_groups: { get_param: sec_group_lin }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  csgoservers:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: nr_of_hosts }
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: { get_param: name_csgo }
+          image: { get_param: image_csgo }
+          flavor: { get_param: flavor_csgo }
+          key_name: { get_param: key_name }
+          networks:
+            - port: { get_resource: port_csgo }
+

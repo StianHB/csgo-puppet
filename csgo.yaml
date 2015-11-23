@@ -1,0 +1,19 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  flavor:
+    type: string
+    default: m1.tiny
+  image:
+    type: string
+    default: Ubuntu Server 14.04.2 (Trusty Tahr)
+  name:
+    type: string
+    default: csgo-host
+
+resources:
+  type: OS::Nova::Server
+  properties:
+    name: { get_param: name }
+    flavor: { get_param: flavor }
+    image: { get_param: image }
