@@ -9,7 +9,7 @@
   "issues_url": null,
   "dependencies": [
     {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"},
-    {"name":"nanliu-archive","version_requirement":">= 1.0.0"}
+    {"name":"camptocamp-archive","version_requirement":">= 0.8.0"}
   ]
 }
 
