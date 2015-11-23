@@ -17,7 +17,7 @@ $(ln -s \$1/Counter-Strike\\ Global\\ Offensive\\ Beta\\ -\\ Dedicated\\ Server 
 	exec { "${srcds_path}/syml.sh ${srcds_path}": 
 		user => 'steam',
 		require => File["${srcds_path}/syml.sh"],
-		unless => "/usr/bin/test -f ${srcds_path}/syml.sh",
+		unless => "/usr/bin/test -f ${srcds_path}/nospace",
 	}
 	exec { "${srcds_path}/nospace/srcds_run -game csgo -console -usercon +game_type ${game_type} +game_mode ${game_mode} +mapgroup ${mapgroup} +map ${map} &":
 		user => 'steam',
